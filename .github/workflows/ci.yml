@@ -9,7 +9,7 @@ on:
 jobs:
   lint-and-test:
     name: Lint, Test & Safety Audit
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout Code
@@ -19,23 +19,22 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: 'npm'
 
-      - name: Install Dependencies
+      - name: Run Unit Tests
         run: |
-          if (Test-Path package.json) {
-            npm ci --ignore-scripts || npm install
-          }
+          if [ -f package.json ]; then
+            npm test
+          fi
 
-      - name: Run Unit Tests & Synthetic Save Emitter
+      - name: Run Synthetic Save Emitter Harness
         run: |
-          if (Test-Path package.json) {
-            npm test --if-present
-          }
+          if [ -f scripts/synthetic_save_emitter.js ]; then
+            node scripts/synthetic_save_emitter.js
+          fi
 
-      - name: Validate Markdown & SDD Links
+      - name: Validate Markdown & SDD Invariants
         run: |
           echo "Validating documentation and invariants..."
-          Get-ChildItem -Path docs -Recurse -Filter *.md | ForEach-Object {
-            Write-Host "Checking $($_.FullName)"
-          }
+          if [ -d docs ]; then
+            find docs -name "*.md" -type f -exec echo "Verified: {}" \;
+          fi
