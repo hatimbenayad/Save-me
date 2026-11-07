@@ -32,6 +32,12 @@ jobs:
             node scripts/synthetic_save_emitter.js
           fi
 
+      - name: Run Rust Core Unit Tests
+        run: |
+          if [ -f src-tauri/Cargo.toml ]; then
+            cargo test --manifest-path src-tauri/Cargo.toml
+          fi
+
       - name: Validate Markdown & SDD Invariants
         run: |
           echo "Validating documentation and invariants..."
