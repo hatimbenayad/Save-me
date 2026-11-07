@@ -1,0 +1,31 @@
+name: Technical Epic / Milestone
+description: Large architectural milestone or multi-task engineering epic.
+title: "[EPIC]: "
+labels: ["epic", "architecture"]
+body:
+  - type: textarea
+    id: epic-overview
+    attributes:
+      label: Epic Overview
+      description: What architectural capability or milestone does this epic establish?
+    validations:
+      required: true
+  - type: textarea
+    id: tasks
+    attributes:
+      label: Task Breakdown
+      description: Checklist of concrete issues and tasks.
+      value: |
+        - [ ] #Task 1: Specification & interfaces
+        - [ ] #Task 2: Implementation & test harness
+        - [ ] #Task 3: Integration & UI bindings
+        - [ ] #Task 4: Documentation & Wiki update
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance-criteria
+    attributes:
+      label: Definition of Done
+      description: Acceptance criteria to close this epic.
+    validations:
+      required: true

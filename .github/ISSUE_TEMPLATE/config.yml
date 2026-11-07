@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Architecture & SDD Blueprint
+    url: https://github.com/hatimbenayad/Save-me/blob/main/docs/SDD.md
+    about: Read the Software Design Document before proposing architectural changes.
+  - name: AI DLC Methodology
+    url: https://github.com/hatimbenayad/Save-me/blob/main/docs/AI_DLC.md
+    about: Review our AI-Augmented Development Life Cycle guidelines.

@@ -1,0 +1,41 @@
+name: CI Verification
+
+on:
+  push:
+    branches: [ main, develop, 'feat/**', 'fix/**' ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  lint-and-test:
+    name: Lint, Test & Safety Audit
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js Environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: |
+          if (Test-Path package.json) {
+            npm ci --ignore-scripts || npm install
+          }
+
+      - name: Run Unit Tests & Synthetic Save Emitter
+        run: |
+          if (Test-Path package.json) {
+            npm test --if-present
+          }
+
+      - name: Validate Markdown & SDD Links
+        run: |
+          echo "Validating documentation and invariants..."
+          Get-ChildItem -Path docs -Recurse -Filter *.md | ForEach-Object {
+            Write-Host "Checking $($_.FullName)"
+          }

@@ -1,0 +1,43 @@
+# Binaries and build artifacts
+target/
+dist/
+build/
+node_modules/
+*.exe
+*.dll
+*.pdb
+*.so
+*.dylib
+
+# Tauri
+src-tauri/target/
+
+# IDE and OS files
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs and databases
+*.log
+*.sqlite
+*.sqlite3
+*.db
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Environment and secrets
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+
+# Local test game slots and snapshots
+/test_gameslots/
+/test_snapshots_storage/

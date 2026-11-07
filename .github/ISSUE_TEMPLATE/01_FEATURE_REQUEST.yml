@@ -1,0 +1,48 @@
+name: Feature Request
+description: Propose a new feature, game profile, or enhancement for Save Rewind.
+title: "[FEAT]: "
+labels: ["enhancement", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to suggest a new feature or improvement!
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem Statement
+      description: What problem does this solve for the player?
+      placeholder: e.g. "When playing Elden Ring, I want quick marks before entering boss fog gates..."
+    validations:
+      required: true
+  - type: textarea
+    id: proposed-solution
+    attributes:
+      label: Proposed Solution
+      description: Describe the solution you'd like to see implemented.
+      placeholder: How should this work in the app?
+    validations:
+      required: true
+  - type: dropdown
+    id: subsystem
+    attributes:
+      label: Affected Subsystem
+      options:
+        - "Timeline UI (Line of Blocks)"
+        - "File Watcher & Debounce"
+        - "Storage Engine & SQLite"
+        - "Safe Restore Engine"
+        - "Game Profiles & Detection"
+        - "Hotkeys & System Tray"
+    validations:
+      required: true
+  - type: checkboxes
+    id: invariants
+    attributes:
+      label: Invariant Compliance
+      description: Ensure this proposed feature does not violate core invariants.
+      options:
+        - label: "Does not modify active game save files during live capture (INV-01)"
+          required: true
+        - label: "Supports non-destructive pre-restore safety snapshots (INV-02)"
+          required: true
