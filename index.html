@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Save Rewind (Save-me) — Game Save Time Machine</title>
+  <link rel="stylesheet" href="src/style.css">
+</head>
+<body>
+
+  <!-- Top Navigation Header -->
+  <header>
+    <div class="logo-area">
+      <div class="logo-icon">⏳</div>
+      <div class="logo-title">
+        <h1>Save Rewind</h1>
+        <p>Continuous Version Control for Game Saves</p>
+      </div>
+      <div class="status-pill">
+        <span class="status-dot"></span>
+        <span>Watching: <strong>Wuchang: Fallen Feathers</strong> (Slot 0)</span>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <button class="btn btn-primary" id="btn-simulate-save">
+        ⚡ Simulate In-Game Save (+14 KB)
+      </button>
+      <button class="btn btn-accent" id="btn-quick-mark">
+        📌 Quick Mark (Ctrl+Shift+S)
+      </button>
+    </div>
+  </header>
+
+  <!-- Filter & Search Toolbar -->
+  <div class="toolbar">
+    <div class="tab-group">
+      <button class="tab active" data-tab="all">All Checkpoints</button>
+      <button class="tab" data-tab="slot0">Slot 0</button>
+      <button class="tab" data-tab="slot1">Slot 1</button>
+      <button class="tab" data-tab="pinned">📌 Pinned Only</button>
+    </div>
+
+    <input
+      type="text"
+      id="search-input"
+      class="search-box"
+      placeholder="Search notes, diffs, or IDs..."
+    />
+  </div>
+
+  <!-- Main Timeline: The "Line of Blocks" -->
+  <main>
+    <div class="timeline-container">
+      <div class="timeline-line"></div>
+      <div id="timeline-list">
+        <!-- Rendered dynamically by src/app.js -->
+      </div>
+    </div>
+  </main>
+
+  <!-- Safe Restore Confirmation Modal (Invariant INV-02) -->
+  <div class="modal-overlay" id="restore-modal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <span>🛡️ Safe Restore Confirmation</span>
+      </div>
+
+      <p style="font-size: 14px; color: #94a3b8; margin-bottom: 12px;">
+        You are about to rewind your game progress to an earlier checkpoint:
+      </p>
+
+      <div id="modal-target-desc" style="background: #1e293b; padding: 12px; border-radius: 6px; font-size: 13px; line-height: 1.6; margin-bottom: 14px;">
+        <!-- Filled dynamically -->
+      </div>
+
+      <div class="alert-box">
+        <strong>⚠️ Non-Destructive Safety Guarantee:</strong>
+        <p style="margin-top: 4px;">
+          An automatic <strong>[Pre-Restore Safety Rollback]</strong> snapshot will be captured immediately before any files are modified. If this restore was a mistake, you can rewind right back!
+        </p>
+      </div>
+
+      <div style="font-size: 12px; color: #64748b; line-height: 1.5;">
+        • <strong>Game Process Status:</strong> Wuchang (Project_Plague.exe) is closed.<br/>
+        • <strong>Cloud Sync Advisory:</strong> If Steam/Xbox Cloud is enabled, ensure cloud sync is paused or set to prioritize local files.
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn" id="btn-cancel-restore">Cancel</button>
+        <button class="btn btn-primary" id="btn-confirm-restore">
+          Confirm & Restore Checkpoint
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="src/app.js"></script>
+</body>
+</html>

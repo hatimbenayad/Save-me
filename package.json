@@ -1,0 +1,27 @@
+{
+  "name": "save-me",
+  "version": "0.1.0",
+  "description": "Save Rewind (Save-me) — Automatic snapshot timeline and safe rewind tool for game saves.",
+  "main": "scripts/synthetic_save_emitter.js",
+  "scripts": {
+    "start": "node scripts/synthetic_save_emitter.js",
+    "test": "node tests/diff_engine.test.js",
+    "harness": "node scripts/synthetic_save_emitter.js",
+    "serve": "npx serve ."
+  },
+  "keywords": [
+    "game-save",
+    "backup",
+    "timeline",
+    "wuchang",
+    "elden-ring",
+    "safe-restore",
+    "ai-dlc"
+  ],
+  "author": "hatimbenayad",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hatimbenayad/Save-me.git"
+  }
+}
