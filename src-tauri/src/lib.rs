@@ -42,9 +42,10 @@ pub fn run() {
             commands::update_title,
             commands::toggle_pin,
             commands::restore_snapshot,
-            commands::detect_wuchang_path
+            commands::detect_wuchang_path,
+            commands::quick_mark,
+            commands::simulate_save_write
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
-
