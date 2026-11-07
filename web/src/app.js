@@ -1,5 +1,6 @@
 /**
  * Save Rewind - Frontend Application State & "Line of Blocks" Controller
+ * Supports hybrid operation: Native Tauri IPC bridge + Standalone Browser mode.
  */
 
 // Initial Seed Data reflecting realistic playthrough saves
@@ -53,6 +54,7 @@ let snapshots = [
 let activeTab = "all";
 let searchQuery = "";
 let pendingRestoreTarget = null;
+const isTauri = typeof window !== 'undefined' && (window.__TAURI__ !== undefined || window.__TAURI_INTERNALS__ !== undefined);
 
 // DOM Elements
 const timelineContainer = document.getElementById("timeline-list");
@@ -166,7 +168,7 @@ function escapeHtml(text) {
 }
 
 // Inline Rename
-function startInlineEdit(id, element) {
+async function startInlineEdit(id, element) {
   const snap = snapshots.find(s => s.id === id);
   if (!snap) return;
 
@@ -180,10 +182,17 @@ function startInlineEdit(id, element) {
   input.focus();
   input.select();
 
-  function finish() {
+  async function finish() {
     const val = input.value.trim();
-    if (val) {
+    if (val && val !== currentTitle) {
       snap.title = val;
+      if (isTauri && window.__TAURI__?.core) {
+        try {
+          await window.__TAURI__.core.invoke("update_title", { snapshotId: id, newTitle: val });
+        } catch (e) {
+          console.warn("Tauri invoke update_title:", e);
+        }
+      }
     }
     renderTimeline();
   }
@@ -196,15 +205,22 @@ function startInlineEdit(id, element) {
 }
 
 // Toggle Pin
-window.togglePin = function(id) {
+window.togglePin = async function(id) {
   const snap = snapshots.find(s => s.id === id);
   if (snap) {
     snap.isPinned = !snap.isPinned;
+    if (isTauri && window.__TAURI__?.core) {
+      try {
+        await window.__TAURI__.core.invoke("toggle_pin", { snapshotId: id });
+      } catch (e) {
+        console.warn("Tauri invoke toggle_pin:", e);
+      }
+    }
     renderTimeline();
   }
 };
 
-// Safe Restore
+// Safe Restore (Invariant INV-02)
 window.promptRestore = function(id) {
   const target = snapshots.find(s => s.id === id);
   if (!target) return;
@@ -217,7 +233,7 @@ window.promptRestore = function(id) {
   restoreModal.classList.add("active");
 };
 
-btnConfirmRestore.addEventListener("click", () => {
+btnConfirmRestore.addEventListener("click", async () => {
   if (!pendingRestoreTarget) return;
 
   // Invariant INV-02: Create safety snapshot of current active state first
@@ -234,6 +250,18 @@ btnConfirmRestore.addEventListener("click", () => {
     isSafety: true
   };
 
+  if (isTauri && window.__TAURI__?.core) {
+    try {
+      await window.__TAURI__.core.invoke("restore_snapshot", {
+        snapshotId: pendingRestoreTarget.id,
+        targetDir: "./test_gameslots/maingame0",
+        processName: "Project_Plague.exe"
+      });
+    } catch (e) {
+      console.warn("Tauri invoke restore_snapshot:", e);
+    }
+  }
+
   snapshots.push(safetySnapshot);
   restoreModal.classList.remove("active");
   pendingRestoreTarget = null;
@@ -248,7 +276,7 @@ btnCancelRestore.addEventListener("click", () => {
 });
 
 // Simulate Live In-Game Save Event
-btnSimulate.addEventListener("click", () => {
+btnSimulate.addEventListener("click", async () => {
   const last = snapshots[snapshots.length - 1];
   const deltaKb = (Math.random() * 15 + 2).toFixed(1);
   const deltaBytes = Math.round(parseFloat(deltaKb) * 1024);
@@ -266,13 +294,25 @@ btnSimulate.addEventListener("click", () => {
     isSafety: false
   };
 
+  if (isTauri && window.__TAURI__?.core) {
+    try {
+      await window.__TAURI__.core.invoke("simulate_save_write", {
+        targetDir: "./test_gameslots/maingame0",
+        deltaKb: parseInt(deltaKb, 10)
+      });
+    } catch (e) {}
+  }
+
   snapshots.push(newSnap);
   renderTimeline();
 });
 
-// Quick Mark
-btnQuickMark.addEventListener("click", () => {
-  const label = prompt("Enter a Quick Mark note for this snapshot (e.g. 'Before talking to NPC'):", "Manual Checkpoint");
+// Quick Mark Hotkey Handler (Ctrl+Shift+S / In-app trigger)
+function triggerQuickMark() {
+  const label = prompt(
+    "📌 Quick Mark Checkpoint (Ctrl+Shift+S)\n\nEnter a note for this checkpoint (e.g. 'Before talking to NPC' or 'Boss Door'):",
+    "Manual Checkpoint"
+  );
   if (!label) return;
 
   const last = snapshots[snapshots.length - 1];
@@ -280,7 +320,7 @@ btnQuickMark.addEventListener("click", () => {
     id: `quickmark-${Date.now()}`,
     slotId: 0,
     title: `Quick Mark: ${label}`,
-    notes: "Saved via Ctrl+Shift+S hotkey",
+    notes: "Saved via Ctrl+Shift+S shortcut",
     sizeBytes: last.sizeBytes,
     deltaBytes: 0,
     timestamp: new Date().toISOString().replace(/T/, ' ').replace(/\..+/, ''),
@@ -288,8 +328,24 @@ btnQuickMark.addEventListener("click", () => {
     isSafety: false
   };
 
+  if (isTauri && window.__TAURI__?.core) {
+    try {
+      window.__TAURI__.core.invoke("quick_mark", { label });
+    } catch (e) {}
+  }
+
   snapshots.push(newSnap);
   renderTimeline();
+}
+
+btnQuickMark.addEventListener("click", triggerQuickMark);
+
+// Global Keyboard Shortcut: Ctrl + Shift + S
+window.addEventListener("keydown", e => {
+  if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === "S" || e.key === "s")) {
+    e.preventDefault();
+    triggerQuickMark();
+  }
 });
 
 // Search and Tabs
@@ -306,6 +362,18 @@ document.querySelectorAll(".tab").forEach(tab => {
     renderTimeline();
   });
 });
+
+// Auto-detect save path if in Tauri
+if (isTauri && window.__TAURI__?.core) {
+  window.__TAURI__.core.invoke("detect_wuchang_path").then(path => {
+    if (path) {
+      const statusPill = document.querySelector(".status-pill span:last-child");
+      if (statusPill) {
+        statusPill.innerHTML = `Watching: <strong>Wuchang</strong> (${escapeHtml(path)})`;
+      }
+    }
+  }).catch(() => {});
+}
 
 // Initial render
 renderTimeline();
